@@ -7,9 +7,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
+	startTime := time.Now()
 	lines := loadFile("../input.txt")
 	seeds := getSeedsFromFile(lines)
 	// fmt.Println(seeds)
@@ -24,9 +26,9 @@ func main() {
 	}
 
 	sortedSeeds := sortingSeeds(seeds)
-	fmt.Printf("sortedSeeds = %v\n", sortedSeeds)
+	// fmt.Printf("sortedSeeds = %v\n", sortedSeeds)
 	seedRange := getSeedRange(sortedSeeds)
-	fmt.Printf("seedRange   = %v\n", seedRange)
+	// fmt.Printf("seedRange   = %v\n", seedRange)
 
 	for _, s := range seedRange {
 		beg, end := s[0], s[1]
@@ -35,7 +37,10 @@ func main() {
 		}
 	}
 
+	endTime := time.Now()
+	exeTime := endTime.Sub(startTime)
 	fmt.Println(checkPoint[len(checkPoint)-1])
+	fmt.Printf("Function executed in %v\n", exeTime)
 
 }
 
