@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	field, count := loadFile("../example.txt")
+	field, count := loadFile("../input.txt")
 	fmt.Println("field below:")
 	for i, row := range field {
 		fmt.Println(i, row)
@@ -21,17 +22,23 @@ func main() {
 		fmt.Println(i, row)
 	}
 
-	// res := 0
-	// for i := 0; i < len(field); i++ {
-	// 	subRes := getArrangeCount(field[i], sharp[i])
-	// 	fmt.Println(i, subRes)
-	// 	res += subRes
-	// }
-	// fmt.Println(res)
+	res := 0
+	for i := 0; i < len(field); i++ {
+		subRes := getCount(field[i], sharp[i])
+		// fmt.Println(i, subRes)
+		res += subRes
+	}
+	fmt.Printf("The answer is %v\n", res)
 
-	row := []string{"???", "###"}
-	cases := getCasesForRow(row)
-	fmt.Println(cases)
+	// eleCases := getCasesForEle("???")
+	// fmt.Println(eleCases)
+
+	// row := []string{"???", "###"}
+	// cases := getCasesForRow(row)
+	// fmt.Println(cases)
+	// for _, c := range cases {
+	// 	fmt.Println(breakRowByDot(c))
+	// }
 
 }
 
@@ -68,86 +75,76 @@ func changeNumToSharp(countArr [][]string) (sharpArr [][]string) {
 	for i := 0; i < len(countArr); i++ {
 		row := []string{}
 		for j := 0; j < len(countArr[i]); j++ {
-			row = append(row, strings.Repeat("#", strings.Index("0123456789", countArr[i][j])))
+			repeat, _ := strconv.Atoi(countArr[i][j])
+			row = append(row, strings.Repeat("#", repeat))
 		}
 		sharpArr = append(sharpArr, row)
 	}
 	return sharpArr
 }
 
-func getCasesForEle(ele string) (cases [][]string) {
-	eles := []string{}
-	for _, v := range ele {
-		if string(v) == "#" {
-			for j := 0; j < len(eles); j++ {
-				eles[j] += "#"
-			}
-		} else { // if v == ?
-			curLen := len(eles)
-			for j := 0; j < curLen; j++ {
-				eles = append(eles, eles[j]+".")
-				eles[j] += "#"
-			}
-			if len(eles) == 0 {
-				eles = append(eles, ".", "#")
-			}
+func getCasesForEle(ele string) []string {
+	if len(ele) == 0 {
+		return nil
+	}
+	if len(ele) == 1 {
+		cases := []string{"#"}
+		if ele == "?" {
+			cases = append(cases, ".")
+		}
+		return cases
+	}
+	prevCases := getCasesForEle(ele[1:])
+	currCases := []string{}
+	for _, c := range prevCases {
+		currCases = append(currCases, "#"+c)
+		if string(ele[0]) == "?" {
+			currCases = append(currCases, "."+c)
 		}
 	}
-	for _, ele := range eles {
-		cases = append(cases, splitByDot(ele))
-	}
-	return cases
+	return currCases
 }
 
-func getCasesForRow(row []string) (cases [][]string) {
-	for i, ele := range row {
-		if i == 0 {
-			cases = getCasesForEle(ele)
-		} else {
-			for _, newCase := range getCasesForEle(ele) {
-				currCases := cases
-				newCases := [][]string{}
-				for _, tg := range currCases {
-					nc := append(tg, newCase...)
-					newCases = append(newCases, nc)
-				}
-				cases = newCases
-			}
+func getCasesForRow(row []string) [][]string {
+	if len(row) == 0 {
+		return nil
+	}
+	if len(row) == 1 {
+		cases := [][]string{}
+		for _, c := range getCasesForEle(row[0]) {
+			ele := []string{c}
+			cases = append(cases, ele)
+		}
+		return cases
+	}
+	prevCases := getCasesForRow(row[1:])
+	currCases := [][]string{}
+	for _, c := range getCasesForEle(row[0]) {
+		for _, cArr := range prevCases {
+			currCases = append(currCases, append([]string{c}, cArr...))
 		}
 	}
-	return cases
+	return currCases
 }
 
-// func getArrangeCount(fieldRow, countRow []string) (count int) {
-// 	totalCases := [][]string{}
-// 	for _, ele := range fieldRow {
+func breakRowByDot(row []string) []string {
+	var newRow []string
+	for _, ele := range row {
+		newRow = append(newRow, splitByDot(ele)...)
+	}
+	return newRow
+}
 
-// 		if len(totalCases) == 0 {
-// 			totalCases = getCases(ele)
-// 		} else {
-// 			currTotalCases := totalCases
-// 			for _, cases := range getCases(ele) {
-// 				newRow := []string{}
-// 				for i := 0; i < len(currTotalCases); i++ {
-// 					newRow = append(currTotalCases[i], cases...)
-// 				}
-// 				total
-// 			}
-// 			totalCases = currTotalCases
-// 			fmt.Printf("cases: %v\n", totalCases)
-// 		}
-// 	}
-// 	for _, c := range totalCases {
-// 		if checkTwoArrSame(c, countRow) {
-// 			count++
-// 		}
-
-// 	}
-// 	fmt.Printf("cases: %v\n", totalCases)
-
-// 	return count
-
-// }
+func getCount(fieldRow, targetRow []string) (count int) {
+	cases := getCasesForRow(fieldRow)
+	for _, c := range cases {
+		row := breakRowByDot(c)
+		if checkTwoArrSame(row, targetRow) {
+			count++
+		}
+	}
+	return count
+}
 
 func checkTwoArrSame(arr1, arr2 []string) bool {
 	if len(arr1) != len(arr2) {
