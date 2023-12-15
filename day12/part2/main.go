@@ -9,15 +9,17 @@ import (
 )
 
 func main() {
-	fields, counts := loadFile("../example.txt")
+	fields, counts := loadFile("../input.txt")
 	fmt.Printf("field : %v\n", fields)
 	fmt.Printf("count : %v\n", counts)
 
 	res := 0
 	for i, field := range fields {
+		// subRes := len(createTargetIntArray(field, counts[i]))
 		subRes := 0
-		for _, can := range deleteZero(createTargetIntArray(field)) {
-			if checkTwoArrSame(can, counts[i]) {
+		for _, can := range deleteZero(createTargetIntArray(field, counts[i])) {
+			count5x := copyCount(counts[i])
+			if checkTwoArrSame(can, count5x) {
 				subRes++
 			}
 		}
@@ -26,8 +28,8 @@ func main() {
 	}
 	fmt.Printf("The answer is %v\n", res)
 
-	intArr := createTargetIntArray(".??..??...?##.")
-	fmt.Println(intArr)
+	// intArr := createTargetIntArray("????.#...#...?????.#...#...?????.#...#...?????.#...#...?????.#...#...", []int{4, 1, 1})
+	// fmt.Println(len(intArr))
 
 }
 
@@ -39,8 +41,8 @@ func loadFile(fileName string) (field []string, count [][]int) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		row := strings.Split(line, " ")
-		// field = append(field, row[0]+"?"+row[0]+"?"+row[0]+"?"+row[0]+"?"+row[0])
-		field = append(field, row[0])
+		field = append(field, row[0]+"?"+row[0]+"?"+row[0]+"?"+row[0]+"?"+row[0])
+		// field = append(field, row[0])
 
 		nums := []int{}
 		for _, s := range strings.Split(row[1], ",") {
@@ -65,7 +67,7 @@ func checkTwoArrSame(arr1, arr2 []int) bool {
 	return true
 }
 
-func createTargetIntArray(field string) [][]int {
+func createTargetIntArray(field string, count []int) [][]int {
 	if len(field) == 1 {
 		if field == "." {
 			ans := [][]int{}
@@ -83,12 +85,27 @@ func createTargetIntArray(field string) [][]int {
 			return ans
 		}
 	}
-	prevAns := createTargetIntArray(field[1:])
+	prevAns := createTargetIntArray(field[1:], count)
 	currAns := [][]int{}
 	if string(field[0]) == "." {
+		// fmt.Printf("field=%v | prevAns=%v\n", field, prevAns)
 		for _, numArr := range prevAns {
-			numArr = append([]int{0}, numArr...)
-			currAns = append(currAns, numArr)
+			i := 1
+			if numArr[0] != 0 {
+				numArr = append([]int{0}, numArr...)
+			}
+			if len(numArr) == 1 && numArr[0] == 0 {
+				currAns = append(currAns, numArr)
+				continue
+			}
+			numCnt := len(numArr[i:]) % len(count)
+			if numCnt == 0 {
+				numCnt = len(count)
+			}
+			// fmt.Printf("numArr=%v | i=%v | count[p]=%v\n", numArr, i, count[len(count)-numCnt])
+			if numArr[i] == count[len(count)-numCnt] {
+				currAns = append(currAns, numArr)
+			}
 		}
 	} else if string(field[0]) == "#" {
 		for _, numArr := range prevAns {
@@ -97,9 +114,28 @@ func createTargetIntArray(field string) [][]int {
 		}
 	} else { // string(field[0]) == "?"
 		for _, numArr := range prevAns {
-			curArr := numArr
-			curArr = append([]int{0}, curArr...)
-			currAns = append(currAns, curArr)
+			// case "."
+			curArr := copy(numArr)
+			i := 1
+			if curArr[0] != 0 {
+				curArr = append([]int{0}, curArr...)
+			}
+			if len(curArr) == 1 && curArr[0] == 0 {
+				currAns = append(currAns, curArr)
+				// case "#"
+				numArr[0]++
+				currAns = append(currAns, numArr)
+				continue
+			}
+			numCnt := len(curArr[i:]) % len(count)
+			if numCnt == 0 {
+				numCnt = len(count)
+			}
+			// fmt.Printf("curArr=%v | i=%v | count[p]=%v\n", curArr, i, count[len(count)-numCnt])
+			if curArr[i] == count[len(count)-numCnt] {
+				currAns = append(currAns, curArr)
+			}
+			// case "#"
 			numArr[0]++
 			currAns = append(currAns, numArr)
 		}
@@ -131,4 +167,21 @@ func deleteZero(numArr [][]int) (newArr [][]int) {
 		newArr = append(newArr, newRow)
 	}
 	return newArr
+}
+
+func copy(arr []int) []int {
+	arr2 := []int{}
+	for i := 0; i < len(arr); i++ {
+		arr2 = append(arr2, arr[i])
+	}
+	return arr2
+}
+
+func copyCount(count []int) (res []int) {
+	res = append(res, count...)
+	res = append(res, count...)
+	res = append(res, count...)
+	res = append(res, count...)
+	res = append(res, count...)
+	return res
 }
