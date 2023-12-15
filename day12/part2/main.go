@@ -17,9 +17,9 @@ func main() {
 	for i, field := range fields {
 		// subRes := len(createTargetIntArray(field, counts[i]))
 		subRes := 0
-		for _, can := range deleteZero(createTargetIntArray(field, counts[i])) {
-			count5x := copyCount(counts[i])
-			if checkTwoArrSame(can, count5x) {
+		count := copyCount(counts[i])
+		for _, can := range deleteZero(createTargetIntArray(field, count)) {
+			if checkTwoArrSame(can, count) {
 				subRes++
 			}
 		}
@@ -28,7 +28,10 @@ func main() {
 	}
 	fmt.Printf("The answer is %v\n", res)
 
-	// intArr := createTargetIntArray("????.#...#...?????.#...#...?????.#...#...?????.#...#...?????.#...#...", []int{4, 1, 1})
+	// intArr := createTargetIntArray("??.??????#???.?#???.??????#???.?#???.??????#???.?#???.??????#???.?#???.??????#???.?#", []int{1, 1, 3, 1, 2, 1, 1, 3, 1, 2, 1, 1, 3, 1, 2, 1, 1, 3, 1, 2, 1, 1, 3, 1, 2})
+	// fmt.Println(len(intArr))
+
+	// intArr := createTargetIntArray(".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.", []int{1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3})
 	// fmt.Println(len(intArr))
 
 }
@@ -90,7 +93,6 @@ func createTargetIntArray(field string, count []int) [][]int {
 	if string(field[0]) == "." {
 		// fmt.Printf("field=%v | prevAns=%v\n", field, prevAns)
 		for _, numArr := range prevAns {
-			i := 1
 			if numArr[0] != 0 {
 				numArr = append([]int{0}, numArr...)
 			}
@@ -98,12 +100,8 @@ func createTargetIntArray(field string, count []int) [][]int {
 				currAns = append(currAns, numArr)
 				continue
 			}
-			numCnt := len(numArr[i:]) % len(count)
-			if numCnt == 0 {
-				numCnt = len(count)
-			}
-			// fmt.Printf("numArr=%v | i=%v | count[p]=%v\n", numArr, i, count[len(count)-numCnt])
-			if numArr[i] == count[len(count)-numCnt] {
+			// fmt.Printf("numArr=%v | count[p]=%v\n", numArr, count[len(count)-(len(numArr)-1)])
+			if len(numArr) <= len(count)+1 && numArr[1] == count[len(count)-(len(numArr)-1)] {
 				currAns = append(currAns, numArr)
 			}
 		}
@@ -116,7 +114,6 @@ func createTargetIntArray(field string, count []int) [][]int {
 		for _, numArr := range prevAns {
 			// case "."
 			curArr := copy(numArr)
-			i := 1
 			if curArr[0] != 0 {
 				curArr = append([]int{0}, curArr...)
 			}
@@ -127,12 +124,8 @@ func createTargetIntArray(field string, count []int) [][]int {
 				currAns = append(currAns, numArr)
 				continue
 			}
-			numCnt := len(curArr[i:]) % len(count)
-			if numCnt == 0 {
-				numCnt = len(count)
-			}
-			// fmt.Printf("curArr=%v | i=%v | count[p]=%v\n", curArr, i, count[len(count)-numCnt])
-			if curArr[i] == count[len(count)-numCnt] {
+			// fmt.Printf("curArr=%v | p=%v | count[p]=%v\n", curArr, len(count)-(len(curArr)-1), count[len(count)-(len(curArr)-1)])
+			if len(curArr) <= len(count)+1 && curArr[1] == count[len(count)-(len(curArr)-1)] {
 				currAns = append(currAns, curArr)
 			}
 			// case "#"
