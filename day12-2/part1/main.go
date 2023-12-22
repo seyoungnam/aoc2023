@@ -22,7 +22,9 @@ func main() {
 
 	res := 0
 	for i := 0; i < len(field); i++ {
-		res += getCount(field[i], count[i])
+		subRes := getCount(field[i], count[i])
+		fmt.Printf("subRes : %v\n", subRes)
+		res += subRes
 	}
 	fmt.Printf("The answer is %v\n", res)
 
@@ -47,7 +49,7 @@ func loadFile(fileName string) (field []string, count [][]int) {
 	return field, count
 }
 
-func getCount(field string, nums []int) (cnt int) {
+func getCount(field string, nums []int) int {
 	if field == "" {
 		if len(nums) == 0 {
 			return 1
@@ -62,13 +64,19 @@ func getCount(field string, nums []int) (cnt int) {
 		return 1
 	}
 
+	cnt := 0
+
 	if strings.Contains(".?", string(field[0])) {
 		cnt += getCount(field[1:], nums)
 	}
 
 	if strings.Contains("#?", string(field[0])) {
-		if nums[0] <= len(field) && !strings.Contains(field[:nums[0]], ".") && (nums[0] == len(field) || string(field[nums[0]]) != "#") {
-			cnt += getCount(field[nums[0]+1:], nums[1:])
+		if nums[0] <= len(field) && !strings.Contains(field[:nums[0]], ".") {
+			if nums[0] == len(field) {
+				cnt += getCount(field[nums[0]:], nums[1:])
+			} else if string(field[nums[0]]) != "#" {
+				cnt += getCount(field[nums[0]+1:], nums[1:])
+			}
 		}
 	}
 	return cnt
